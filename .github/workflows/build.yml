@@ -108,21 +108,13 @@ jobs:
         run: |
           cat > android/build.gradle << 'EOF'
           buildscript {
-              ext {
-                  buildToolsVersion = "33.0.2"
-                  minSdkVersion    = 28
-                  compileSdkVersion = 33
-                  targetSdkVersion  = 33
-                  ndkVersion        = "25.2.9519653"
-                  kotlinVersion     = "1.8.0"
-              }
               repositories {
                   google()
                   mavenCentral()
               }
               dependencies {
                   classpath("com.android.tools.build:gradle:8.1.1")
-                  classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
+                  classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.0")
               }
           }
           allprojects {
@@ -138,14 +130,6 @@ jobs:
       - name: Create android/settings.gradle
         run: |
           cat > android/settings.gradle << 'EOF'
-          pluginManagement {
-              includeBuild("../node_modules/@react-native/gradle-plugin")
-              repositories {
-                  google()
-                  mavenCentral()
-                  gradlePluginPortal()
-              }
-          }
           rootProject.name = 'GestureTVRemote'
           include ':app'
           EOF
@@ -163,15 +147,10 @@ jobs:
           IS_HERMES_ENABLED=true
           EOF
 
-      - name: Create android/app/build.gradle
+       - name: Create android/app/build.gradle
         run: |
           cat > android/app/build.gradle << 'EOF'
           apply plugin: "com.android.application"
-          apply plugin: "com.facebook.react"
-
-          react {
-              autolinkLibrariesWithApp()
-          }
 
           android {
               compileSdkVersion 33
@@ -193,11 +172,25 @@ jobs:
                       proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
                   }
               }
+
+              packagingOptions {
+                  pickFirst 'lib/x86/libc++_shared.so'
+                  pickFirst 'lib/x86_64/libc++_shared.so'
+                  pickFirst 'lib/armeabi-v7a/libc++_shared.so'
+                  pickFirst 'lib/arm64-v8a/libc++_shared.so'
+              }
+          }
+
+          repositories {
+              maven { url "$rootDir/../../node_modules/react-native/android" }
+              maven { url 'https://www.jitpack.io' }
+              google()
+              mavenCentral()
           }
 
           dependencies {
-              implementation("com.facebook.react:react-android")
-              implementation("com.facebook.react:hermes-android")
+              implementation("com.facebook.react:react-android:0.73.6")
+              implementation("com.facebook.react:hermes-android:0.73.6")
           }
           EOF
 
