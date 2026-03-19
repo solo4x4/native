@@ -281,6 +281,14 @@ jobs:
             ~/.gradle/wrapper
           key: gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: gradle-
+      
+      - name: Create metro.config.js
+        run: |
+          cat > metro.config.js << 'EOF'
+          const {getDefaultConfig, mergeConfig} = require('@react-native/metro-config');
+          const config = {};
+          module.exports = mergeConfig(getDefaultConfig(__dirname), config);
+          EOF
 
       - name: Bundle JavaScript into APK
         run: |
