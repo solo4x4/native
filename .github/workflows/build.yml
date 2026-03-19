@@ -216,10 +216,8 @@ jobs:
           cat > android/gradlew << 'GRADLEW'
           #!/bin/sh
           APP_HOME="$(cd "$(dirname "$0")" && pwd -P)"
-          DEFAULT_JVM_OPTS='"-Xmx64m" "-Xms64m"'
           CLASSPATH="$APP_HOME/gradle/wrapper/gradle-wrapper.jar"
-          exec java $DEFAULT_JVM_OPTS -classpath "$CLASSPATH" \
-            org.gradle.wrapper.GradleWrapperMain "$@"
+          exec java -Xmx64m -Xms64m -classpath "$CLASSPATH" org.gradle.wrapper.GradleWrapperMain "$@"
           GRADLEW
 
           chmod +x android/gradlew
