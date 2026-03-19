@@ -93,11 +93,11 @@ jobs:
       - name: Create MainActivity.java
         run: |
           mkdir -p android/app/src/main/java/com/gesturetvremote
+
           cat > android/app/src/main/java/com/gesturetvremote/MainActivity.java << 'EOF'
           package com.gesturetvremote;
           import com.facebook.react.ReactActivity;
           import com.facebook.react.ReactActivityDelegate;
-          import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint;
           import com.facebook.react.defaults.DefaultReactActivityDelegate;
 
           public class MainActivity extends ReactActivity {
@@ -106,10 +106,50 @@ jobs:
 
             @Override
             protected ReactActivityDelegate createReactActivityDelegate() {
-              return new DefaultReactActivityDelegate(
-                this, getMainComponentName(),
-                DefaultNewArchitectureEntryPoint.getFabricEnabled()
-              );
+              return new DefaultReactActivityDelegate(this, getMainComponentName(), false);
+            }
+          }
+          EOF
+
+          cat > android/app/src/main/java/com/gesturetvremote/MainApplication.java << 'EOF'
+          package com.gesturetvremote;
+          import android.app.Application;
+          import com.facebook.react.ReactApplication;
+          import com.facebook.react.ReactNativeHost;
+          import com.facebook.react.ReactPackage;
+          import com.facebook.react.defaults.DefaultReactNativeHost;
+          import com.facebook.soloader.SoLoader;
+          import java.util.ArrayList;
+          import java.util.List;
+
+          public class MainApplication extends Application implements ReactApplication {
+            private final ReactNativeHost mReactNativeHost =
+              new DefaultReactNativeHost(this) {
+                @Override
+                public boolean getUseDeveloperSupport() { return true; }
+
+                @Override
+                protected List<ReactPackage> getPackages() {
+                  return new ArrayList<>();
+                }
+
+                @Override
+                protected String getJSMainModuleName() { return "index"; }
+
+                @Override
+                protected boolean isNewArchEnabled() { return false; }
+
+                @Override
+                protected Boolean isHermesEnabled() { return true; }
+              };
+
+            @Override
+            public ReactNativeHost getReactNativeHost() { return mReactNativeHost; }
+
+            @Override
+            public void onCreate() {
+              super.onCreate();
+              SoLoader.init(this, false);
             }
           }
           EOF
