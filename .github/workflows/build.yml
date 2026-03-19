@@ -210,11 +210,9 @@ jobs:
           zipStorePath=wrapper/dists
           EOF
 
-          # Download the official gradle-wrapper.jar
           curl -sL "https://github.com/gradle/gradle/raw/v8.3.0/gradle/wrapper/gradle-wrapper.jar" \
             -o android/gradle/wrapper/gradle-wrapper.jar
 
-          # Write gradlew script
           cat > android/gradlew << 'GRADLEW'
           #!/bin/sh
           APP_HOME="$(cd "$(dirname "$0")" && pwd -P)"
@@ -243,18 +241,20 @@ jobs:
           cd android
           ./gradlew assembleDebug --no-daemon --stacktrace 2>&1 | tee ../build.log
 
-      - name: Find APK
+      - name: Find APK location
+        if: always()
         run: |
-          echo "=== Searching for APK files ==="
-          find . -name "*.apk" 2>/dev/null
-          echo "=== Done ==="
+          echo "=== All APK files found ==="
+          find . -name "*.apk" 2>/dev/null || echo "No APK files found"
+          echo "=== Build output directory ==="
+          find . -path "*/build/outputs*" -type f 2>/dev/null || echo "No build outputs found"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
+        if: success()
         with:
           name: gesture-tv-apk
-          path: |
-            **/*.apk
+          path: "**/*.apk"
 
       - name: Upload build log on failure
         uses: actions/upload-artifact@v4
