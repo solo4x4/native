@@ -147,7 +147,7 @@ jobs:
           IS_HERMES_ENABLED=true
           EOF
 
-       - name: Create android/app/build.gradle
+      - name: Create android/app/build.gradle
         run: |
           cat > android/app/build.gradle << 'EOF'
           apply plugin: "com.android.application"
