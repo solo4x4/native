@@ -213,14 +213,12 @@ jobs:
           curl -sL "https://github.com/gradle/gradle/raw/v8.3.0/gradle/wrapper/gradle-wrapper.jar" \
             -o android/gradle/wrapper/gradle-wrapper.jar
 
-          cat > android/gradlew << 'GRADLEW'
+          cat > android/gradlew << 'EOF'
           #!/bin/sh
-          APP_HOME="$(cd "$(dirname "$0")" && pwd -P)"
-          DEFAULT_JVM_OPTS='"-Xmx64m" "-Xms64m"'
+          APP_HOME=$(cd "$(dirname "$0")" && pwd -P)
           CLASSPATH="$APP_HOME/gradle/wrapper/gradle-wrapper.jar"
-          exec java $DEFAULT_JVM_OPTS -classpath "$CLASSPATH" \
-            org.gradle.wrapper.GradleWrapperMain "$@"
-          GRADLEW
+          exec java -classpath "$CLASSPATH" org.gradle.wrapper.GradleWrapperMain "$@"
+          EOF
 
           chmod +x android/gradlew
 
