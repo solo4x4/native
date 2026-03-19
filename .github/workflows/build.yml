@@ -34,13 +34,6 @@ jobs:
       - name: Install npm dependencies
         run: npm install
 
-      - name: Download MediaPipe hand landmark model
-        run: |
-          mkdir -p android/app/src/main/assets
-          wget -q -O android/app/src/main/assets/hand_landmarker.task \
-            "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/latest/hand_landmarker.task"
-          echo "Model downloaded: $(du -sh android/app/src/main/assets/hand_landmarker.task)"
-
       - name: Create index.js
         run: |
           cat > index.js << 'EOF'
@@ -71,6 +64,7 @@ jobs:
       - name: Create android resource files
         run: |
           mkdir -p android/app/src/main/res/values
+          mkdir -p android/app/src/main/assets
 
           cat > android/app/src/main/res/values/strings.xml << 'EOF'
           <resources>
@@ -85,108 +79,6 @@ jobs:
               </style>
           </resources>
           EOF
-
-      - name: Create android/build.gradle
-        run: |
-          cat > android/build.gradle << 'EOF'
-          buildscript {
-              ext {
-                  buildToolsVersion = "33.0.2"
-                  minSdkVersion    = 28
-                  compileSdkVersion = 33
-                  targetSdkVersion  = 33
-                  ndkVersion        = "25.2.9519653"
-                  kotlinVersion     = "1.8.0"
-              }
-              repositories {
-                  google()
-                  mavenCentral()
-              }
-              dependencies {
-                  classpath("com.android.tools.build:gradle:8.1.1")
-                  classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
-              }
-          }
-          allprojects {
-              repositories {
-                  google()
-                  mavenCentral()
-                  maven { url 'https://www.jitpack.io' }
-              }
-          }
-          EOF
-
-      - name: Create android/gradle.properties
-        run: |
-          cat > android/gradle.properties << 'EOF'
-          org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g
-          android.useAndroidX=true
-          android.enableJetifier=true
-          ReactNativeArchitectures=arm64-v8a
-          newArchEnabled=false
-          hermesEnabled=true
-          IS_NEW_ARCHITECTURE_ENABLED=false
-          IS_HERMES_ENABLED=true
-          EOF
-
-      - name: Create android/settings.gradle
-        run: |
-          cat > android/settings.gradle << 'EOF'
-          pluginManagement { includeBuild("../node_modules/@react-native/gradle-plugin") }
-          plugins { id("com.facebook.react.settings") }
-          extensions.configure(com.facebook.react.ReactSettingsExtension){ ex -> ex.autolinkLibrariesFromCommand() }
-          rootProject.name = 'GestureTVRemote'
-          include ':app'
-          includeBuild('../node_modules/@react-native/gradle-plugin')
-          EOF
-
-      - name: Create android/app/build.gradle
-        run: |
-          cat > android/app/build.gradle << 'EOF'
-          apply plugin: "com.android.application"
-          apply plugin: "com.facebook.react"
-
-          react { }
-
-          android {
-              ndkVersion rootProject.ext.ndkVersion
-              compileSdkVersion rootProject.ext.compileSdkVersion
-              namespace "com.gesturetvremote"
-
-              defaultConfig {
-                  applicationId "com.gesturetvremote"
-                  minSdkVersion rootProject.ext.minSdkVersion
-                  targetSdkVersion rootProject.ext.targetSdkVersion
-                  versionCode 1
-                  versionName "1.0"
-              }
-
-              splits {
-                  abi {
-                      reset()
-                      enable true
-                      universalApk true
-                      include "arm64-v8a"
-                  }
-              }
-
-              buildTypes {
-                  debug { debuggable true }
-                  release {
-                      minifyEnabled false
-                      proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
-                  }
-              }
-          }
-
-          dependencies {
-              implementation("com.facebook.react:react-android")
-              implementation("com.facebook.react:hermes-android")
-          }
-          EOF
-
-      - name: Create proguard-rules.pro
-        run: echo "# Proguard rules" > android/app/proguard-rules.pro
 
       - name: Create MainActivity.java
         run: |
@@ -212,12 +104,126 @@ jobs:
           }
           EOF
 
-      - name: Generate Gradle wrapper
+      - name: Create android/build.gradle
         run: |
-          if [ ! -f android/gradlew ]; then
-            cd android
-            gradle wrapper --gradle-version=8.3 --distribution-type=bin
-          fi
+          cat > android/build.gradle << 'EOF'
+          buildscript {
+              ext {
+                  buildToolsVersion = "33.0.2"
+                  minSdkVersion    = 28
+                  compileSdkVersion = 33
+                  targetSdkVersion  = 33
+                  ndkVersion        = "25.2.9519653"
+                  kotlinVersion     = "1.8.0"
+              }
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+              dependencies {
+                  classpath("com.android.tools.build:gradle:8.1.1")
+                  classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
+                  classpath("com.facebook.react:react-native-gradle-plugin")
+              }
+          }
+          allprojects {
+              repositories {
+                  google()
+                  mavenCentral()
+                  maven { url "$rootDir/../node_modules/react-native/android" }
+                  maven { url 'https://www.jitpack.io' }
+              }
+          }
+          EOF
+
+      - name: Create android/settings.gradle
+        run: |
+          cat > android/settings.gradle << 'EOF'
+          rootProject.name = 'GestureTVRemote'
+          apply from: file("../node_modules/@react-native-community/cli-platform-android/native_modules.gradle")
+          applyNativeModulesSettingsGradle(settings)
+          include ':app'
+          EOF
+
+      - name: Create android/gradle.properties
+        run: |
+          cat > android/gradle.properties << 'EOF'
+          org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g
+          android.useAndroidX=true
+          android.enableJetifier=true
+          ReactNativeArchitectures=arm64-v8a
+          newArchEnabled=false
+          hermesEnabled=true
+          IS_NEW_ARCHITECTURE_ENABLED=false
+          IS_HERMES_ENABLED=true
+          EOF
+
+      - name: Create android/app/build.gradle
+        run: |
+          cat > android/app/build.gradle << 'EOF'
+          apply plugin: "com.android.application"
+          apply from: "../../node_modules/react-native/react.gradle"
+
+          android {
+              compileSdkVersion 33
+              namespace "com.gesturetvremote"
+              ndkVersion "25.2.9519653"
+
+              defaultConfig {
+                  applicationId "com.gesturetvremote"
+                  minSdkVersion 28
+                  targetSdkVersion 33
+                  versionCode 1
+                  versionName "1.0"
+              }
+
+              buildTypes {
+                  debug { debuggable true }
+                  release {
+                      minifyEnabled false
+                      proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+                  }
+              }
+          }
+
+          dependencies {
+              implementation("com.facebook.react:react-android")
+              implementation("com.facebook.react:hermes-android")
+              implementation fileTree(dir: "libs", include: ["*.jar"])
+          }
+          EOF
+
+      - name: Create proguard-rules.pro
+        run: echo "# Proguard rules" > android/app/proguard-rules.pro
+
+      - name: Create Gradle wrapper files
+        run: |
+          mkdir -p android/gradle/wrapper
+
+          cat > android/gradle/wrapper/gradle-wrapper.properties << 'EOF'
+          distributionBase=GRADLE_USER_HOME
+          distributionPath=wrapper/dists
+          distributionUrl=https\://services.gradle.org/distributions/gradle-8.3-bin.zip
+          networkTimeout=10000
+          validateDistributionUrl=true
+          zipStoreBase=GRADLE_USER_HOME
+          zipStorePath=wrapper/dists
+          EOF
+
+          # Download the official gradle-wrapper.jar
+          curl -sL "https://github.com/gradle/gradle/raw/v8.3.0/gradle/wrapper/gradle-wrapper.jar" \
+            -o android/gradle/wrapper/gradle-wrapper.jar
+
+          # Write gradlew script
+          cat > android/gradlew << 'GRADLEW'
+          #!/bin/sh
+          APP_HOME="$(cd "$(dirname "$0")" && pwd -P)"
+          DEFAULT_JVM_OPTS='"-Xmx64m" "-Xms64m"'
+          CLASSPATH="$APP_HOME/gradle/wrapper/gradle-wrapper.jar"
+          exec java $DEFAULT_JVM_OPTS -classpath "$CLASSPATH" \
+            org.gradle.wrapper.GradleWrapperMain "$@"
+          GRADLEW
+
           chmod +x android/gradlew
 
       - name: Cache Gradle
