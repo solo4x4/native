@@ -123,7 +123,6 @@ jobs:
               dependencies {
                   classpath("com.android.tools.build:gradle:8.1.1")
                   classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
-                  classpath("com.facebook.react:react-native-gradle-plugin")
               }
           }
           allprojects {
@@ -139,9 +138,15 @@ jobs:
       - name: Create android/settings.gradle
         run: |
           cat > android/settings.gradle << 'EOF'
+          pluginManagement {
+              includeBuild("../node_modules/@react-native/gradle-plugin")
+              repositories {
+                  google()
+                  mavenCentral()
+                  gradlePluginPortal()
+              }
+          }
           rootProject.name = 'GestureTVRemote'
-          apply from: file("../node_modules/@react-native-community/cli-platform-android/native_modules.gradle")
-          applyNativeModulesSettingsGradle(settings)
           include ':app'
           EOF
 
@@ -162,7 +167,11 @@ jobs:
         run: |
           cat > android/app/build.gradle << 'EOF'
           apply plugin: "com.android.application"
-          apply from: "../../node_modules/react-native/react.gradle"
+          apply plugin: "com.facebook.react"
+
+          react {
+              autolinkLibrariesWithApp()
+          }
 
           android {
               compileSdkVersion 33
@@ -189,7 +198,6 @@ jobs:
           dependencies {
               implementation("com.facebook.react:react-android")
               implementation("com.facebook.react:hermes-android")
-              implementation fileTree(dir: "libs", include: ["*.jar"])
           }
           EOF
 
