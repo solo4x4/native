@@ -1,9 +1,7 @@
-// App.tsx
 import React from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import {StatusBar} from 'react-native';
-import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import SettingsScreen from './src/screens/SettingsScreen';
 import RemoteScreen from './src/screens/RemoteScreen';
 
@@ -16,7 +14,7 @@ const Stack = createStackNavigator<RootStackParamList>();
 
 export default function App() {
   return (
-    <GestureHandlerRootView style={{flex: 1}}>
+    <>
       <StatusBar barStyle="light-content" backgroundColor="#0a0a0f" />
       <NavigationContainer>
         <Stack.Navigator
@@ -39,6 +37,6 @@ export default function App() {
           />
         </Stack.Navigator>
       </NavigationContainer>
-    </GestureHandlerRootView>
+    </>
   );
 }
