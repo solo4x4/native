@@ -10,7 +10,7 @@ export type RootStackParamList = {
   Remote: {mode: 'bt' | 'adb'};
 };
 
-const Stack = createStackNavigator<RootStackParamList>();
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function App() {
   return (
