@@ -19,12 +19,12 @@ export default function App() {
       <NavigationContainer>
         <Stack.Navigator
           initialRouteName="Settings"
-          screenOptions={{
-            headerStyle: {backgroundColor: '#0a0a0f'},
-            headerTintColor: '#00d8ff',
-            headerTitleStyle: {fontWeight: 'bold'},
-            cardStyle: {backgroundColor: '#0a0a0f'},
-          }}>
+screenOptions={{
+  headerStyle: {backgroundColor: '#0a0a0f'},
+  headerTintColor: '#00d8ff',
+  headerTitleStyle: {fontWeight: 'bold'},
+  contentStyle: {backgroundColor: '#0a0a0f'},
+}}>
           <Stack.Screen
             name="Settings"
             component={SettingsScreen}
