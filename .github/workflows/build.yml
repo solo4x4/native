@@ -26,8 +26,8 @@ jobs:
 
       - name: Install Android SDK components
         run: |
-          sdkmanager "platforms;android-33" \
-                     "build-tools;33.0.2" \
+          sdkmanager "platforms;android-35" \
+                     "build-tools;35.0.0" \
                      "platform-tools" \
                      "ndk;25.2.9519653"
 
@@ -203,14 +203,14 @@ jobs:
           apply plugin: "com.android.application"
 
           android {
-              compileSdkVersion 33
+              compileSdkVersion 35
               namespace "com.gesturetvremote"
               ndkVersion "25.2.9519653"
 
               defaultConfig {
                   applicationId "com.gesturetvremote"
                   minSdkVersion 28
-                  targetSdkVersion 33
+                  targetSdkVersion 35
                   versionCode 1
                   versionName "1.0"
               }
