@@ -126,7 +126,7 @@ jobs:
             private final ReactNativeHost mReactNativeHost =
               new DefaultReactNativeHost(this) {
                 @Override
-                public boolean getUseDeveloperSupport() { return true; }
+                public boolean getUseDeveloperSupport() { return false; }
 
                 @Override
                 protected List<ReactPackage> getPackages() {
